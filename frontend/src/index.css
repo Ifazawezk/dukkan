@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, "Segoe UI", Tahoma, sans-serif;
+
+  /* Maroon, after the Qatari flag. */
+  --color-brand-50: #fbf2f4;
+  --color-brand-100: #f6e2e7;
+  --color-brand-200: #edc5cf;
+  --color-brand-300: #df9aab;
+  --color-brand-400: #cc6680;
+  --color-brand-500: #b23d5c;
+  --color-brand-600: #9b2546;
+  --color-brand-700: #8a1538;
+  --color-brand-800: #6f1230;
+  --color-brand-900: #5c112a;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-stone-100 text-stone-900 antialiased;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Only the receipt is printed when the receipt dialog is open. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+
+  .print-area {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 80mm;
+  }
+}
