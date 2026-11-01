@@ -2,18 +2,29 @@
 
 from app.models.catalog import Category, Product
 from app.models.inventory import AdjustmentReason, MovementKind, StockLevel, StockMovement
-from app.models.shop import Branch, ShopSettings
+from app.models.purchasing import (
+    PurchaseOrder,
+    PurchaseOrderItem,
+    PurchaseOrderStatus,
+    Supplier,
+)
+from app.models.shop import Branch, DocumentCounter, ShopSettings
 from app.models.user import Role, User
 
 __all__ = [
     "AdjustmentReason",
     "Branch",
     "Category",
+    "DocumentCounter",
     "MovementKind",
     "Product",
+    "PurchaseOrder",
+    "PurchaseOrderItem",
+    "PurchaseOrderStatus",
     "Role",
     "ShopSettings",
     "StockLevel",
     "StockMovement",
+    "Supplier",
     "User",
 ]

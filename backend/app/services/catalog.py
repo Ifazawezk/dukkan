@@ -1,14 +1,9 @@
-from sqlalchemy import Select, func, or_, select
+from sqlalchemy import Select, or_, select
 from sqlalchemy.orm import Session
 
 from app.errors import Conflict, NotFound
 from app.models import Category, Product
-
-
-def like_pattern(text: str) -> str:
-    """Build a 'contains' LIKE pattern with the wildcards in user input escaped."""
-    escaped = text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-    return f"%{escaped}%"
+from app.services.queries import like_pattern
 
 
 def search_products(
@@ -70,7 +65,3 @@ def check_unique_codes(
 def check_category(db: Session, category_id: int | None) -> None:
     if category_id is not None and db.get(Category, category_id) is None:
         raise NotFound("Category not found", category_id=category_id)
-
-
-def count_matching(db: Session, stmt: Select) -> int:
-    return db.scalar(select(func.count()).select_from(stmt.order_by(None).subquery())) or 0

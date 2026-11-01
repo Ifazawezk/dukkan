@@ -6,6 +6,7 @@ from app.models import Product, User
 from app.schemas.catalog import ProductCreate, ProductOut, ProductUpdate
 from app.schemas.common import Page, changed_fields
 from app.services import catalog, inventory
+from app.services.queries import count_matching
 from app.services.shop import get_shop_settings, resolve_branch_id
 
 router = APIRouter(prefix="/products", tags=["products"])
@@ -40,7 +41,7 @@ def list_products(
     offset: int = Query(0, ge=0),
 ) -> Page[ProductOut]:
     stmt = catalog.search_products(q, category_id, include_inactive)
-    total = catalog.count_matching(db, stmt)
+    total = count_matching(db, stmt)
     products = list(db.scalars(stmt.order_by(Product.name).limit(limit).offset(offset)))
     branch = stock_branch(db, user, branch_id)
     stock = (

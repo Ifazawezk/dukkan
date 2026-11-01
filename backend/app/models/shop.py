@@ -41,3 +41,12 @@ class ShopSettings(Base):
     )
     receipt_footer_ar: Mapped[str] = mapped_column(String(255), default="شكراً لتسوقكم معنا")
     updated_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, onupdate=utcnow)
+
+
+class DocumentCounter(Base):
+    """Sequential numbers for documents such as purchase orders and receipts."""
+
+    __tablename__ = "document_counters"
+
+    key: Mapped[str] = mapped_column(String(40), primary_key=True)
+    value: Mapped[int] = mapped_column(Integer, default=0)

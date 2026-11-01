@@ -28,6 +28,10 @@ class Shop:
         self.rng = rng
         self.products = [make_product(self.db, name=f"Item {i}") for i in range(4)]
         self.expected = {p.id: 0 for p in self.products}
+        self.supplier_id = self.post("/api/suppliers", {"name": "Supplier"}).json()["id"]
+
+    def post(self, url, payload=None):
+        return self.client.post(url, json=payload, headers=self.auth["manager"])
 
     def adjust(self, product, **change):
         response = self.client.post(
@@ -41,10 +45,33 @@ class Shop:
             assert response.status_code in (409, 422), response.text
         return response
 
+    def purchase(self, product):
+        ordered = self.rng.randint(1, 24)
+        po = self.post(
+            "/api/purchase-orders",
+            {
+                "supplier_id": self.supplier_id,
+                "items": [{"product_id": product.id, "quantity": ordered}],
+            },
+        ).json()
+        item_id = po["items"][0]["id"]
+        delivered = 0
+        while delivered < ordered and self.rng.random() < 0.8:
+            quantity = self.rng.randint(1, ordered - delivered)
+            response = self.post(
+                f"/api/purchase-orders/{po['id']}/receive",
+                {"lines": [{"item_id": item_id, "quantity": quantity}]},
+            )
+            assert response.status_code == 200, response.text
+            delivered += quantity
+            self.expected[product.id] += quantity
+
     def step(self):
         product = self.rng.choice(self.products)
-        operation = self.rng.choice(["receive", "remove", "count"])
-        if operation == "receive":
+        operation = self.rng.choice(["purchase", "found", "remove", "count"])
+        if operation == "purchase":
+            self.purchase(product)
+        elif operation == "found":
             self.adjust(product, quantity_change=self.rng.randint(1, 20))
         elif operation == "remove":
             before = self.expected[product.id]

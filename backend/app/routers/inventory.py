@@ -14,6 +14,7 @@ from app.schemas.inventory import (
     StockRow,
 )
 from app.services import catalog, inventory
+from app.services.queries import count_matching
 from app.services.shop import resolve_branch_id
 
 router = APIRouter(prefix="/inventory", tags=["inventory"])
@@ -65,7 +66,7 @@ def list_stock(
     if low_only:
         stmt = stmt.where(quantity <= Product.low_stock_threshold)
 
-    total = catalog.count_matching(db, stmt)
+    total = count_matching(db, stmt)
     rows = db.execute(stmt.order_by(Product.name).limit(limit).offset(offset))
     items = []
     for product, qty in rows:
@@ -126,7 +127,7 @@ def list_movements(
         stmt = stmt.where(StockMovement.product_id == product_id)
     if kind is not None:
         stmt = stmt.where(StockMovement.kind == kind)
-    total = catalog.count_matching(db, stmt)
+    total = count_matching(db, stmt)
     movements = db.scalars(
         stmt.options(selectinload(StockMovement.product), selectinload(StockMovement.user))
         .order_by(StockMovement.id.desc())

@@ -13,7 +13,9 @@ from app.routers import (
     health,
     inventory,
     products,
+    purchase_orders,
     settings,
+    suppliers,
     users,
 )
 
@@ -42,7 +44,18 @@ def create_app() -> FastAPI:
     )
     register_error_handlers(app)
 
-    routers = (health, auth, users, branches, settings, categories, products, inventory)
+    routers = (
+        health,
+        auth,
+        users,
+        branches,
+        settings,
+        categories,
+        products,
+        inventory,
+        suppliers,
+        purchase_orders,
+    )
     for module in routers:
         app.include_router(module.router, prefix="/api")
     return app
