@@ -1,0 +1,47 @@
+# Runs the web app, the API and PostgreSQL.
+#
+#   docker compose up --build
+#   docker compose exec api python -m app.cli seed     (optional demo data)
+#
+# Then open http://localhost:8080.
+#
+# The defaults below are for trying Dukkan on your own computer. Before real
+# use, set POSTGRES_PASSWORD and DUKKAN_SECRET_KEY in a .env file next to this
+# one. Generate a key with:
+#   python -c "import secrets; print(secrets.token_urlsafe(48))"
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: dukkan
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dukkan}
+      POSTGRES_DB: dukkan
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dukkan -d dukkan"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./backend
+    environment:
+      DUKKAN_DATABASE_URL: postgresql+psycopg://dukkan:${POSTGRES_PASSWORD:-dukkan}@db:5432/dukkan
+      DUKKAN_SECRET_KEY: ${DUKKAN_SECRET_KEY:-local-docker-key-replace-before-any-real-use}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  web:
+    build: ./frontend
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+
+volumes:
+  db-data:
