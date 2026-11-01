@@ -1,4 +1,4 @@
-import { Languages, LogOut, Package, Store } from "lucide-react";
+import { Languages, LogOut, Package, ShoppingCart, Store } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { NavLink, Outlet } from "react-router";
 import type { Role } from "../api/types";
@@ -18,6 +18,7 @@ interface NavItem {
 const ALL: Role[] = ["owner", "manager", "cashier"];
 
 export const NAV: NavItem[] = [
+  { to: "/pos", label: "nav.pos", icon: ShoppingCart, roles: ALL },
   { to: "/products", label: "nav.products", icon: Package, roles: ALL },
 ];
 

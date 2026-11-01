@@ -1,6 +1,6 @@
 import type { Role } from "./api/types";
 
 /** Where each role lands after signing in. */
-export function homeFor(_role: Role): string {
-  return "/products";
+export function homeFor(role: Role): string {
+  return role === "cashier" ? "/pos" : "/products";
 }

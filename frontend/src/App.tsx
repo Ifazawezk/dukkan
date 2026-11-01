@@ -5,6 +5,7 @@ import { Layout } from "./components/Layout";
 import { Spinner } from "./components/ui";
 import { LoginPage } from "./pages/LoginPage";
 import { ProductsPage } from "./pages/ProductsPage";
+import { PosPage } from "./pages/pos/PosPage";
 import { homeFor } from "./routes";
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -31,6 +32,7 @@ export default function App() {
         }
       >
         <Route index element={<Home />} />
+        <Route path="pos" element={<PosPage />} />
         <Route path="products" element={<ProductsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

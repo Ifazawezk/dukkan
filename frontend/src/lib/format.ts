@@ -33,10 +33,12 @@ export function formatDate(value: string, lang: Lang) {
   return new Intl.DateTimeFormat(locales[lang], { dateStyle: "medium" }).format(new Date(value));
 }
 
-export function formatDateTime(value: string, lang: Lang) {
+/** Date and time, shown in the shop's time zone when one is given. */
+export function formatDateTime(value: string, lang: Lang, timeZone?: string) {
   return new Intl.DateTimeFormat(locales[lang], {
     dateStyle: "medium",
     timeStyle: "short",
+    timeZone,
   }).format(new Date(value));
 }
 
