@@ -66,10 +66,28 @@ class Shop:
             delivered += quantity
             self.expected[product.id] += quantity
 
+    def sell(self):
+        basket = self.rng.sample(self.products, self.rng.randint(1, 3))
+        items = [{"product_id": p.id, "quantity": self.rng.randint(1, 6)} for p in basket]
+        response = self.client.post(
+            "/api/sales",
+            json={"items": items, "payments": [{"method": "cash", "amount": 1000}]},
+            headers=self.auth["cashier"],
+        )
+        if response.status_code == 201:
+            for item in items:
+                self.expected[item["product_id"]] -= item["quantity"]
+        else:
+            # Refused sales must not move any stock at all.
+            assert response.status_code == 409, response.text
+            assert any(self.expected[i["product_id"]] < i["quantity"] for i in items)
+
     def step(self):
         product = self.rng.choice(self.products)
-        operation = self.rng.choice(["purchase", "found", "remove", "count"])
-        if operation == "purchase":
+        operation = self.rng.choice(["purchase", "found", "remove", "count", "sell", "sell"])
+        if operation == "sell":
+            self.sell()
+        elif operation == "purchase":
             self.purchase(product)
         elif operation == "found":
             self.adjust(product, quantity_change=self.rng.randint(1, 20))
@@ -85,7 +103,7 @@ class Shop:
 @pytest.mark.parametrize("seed", range(6))
 def test_random_operations_keep_stock_consistent(seed, client, db, auth, branch):
     shop = Shop(client, db, auth, branch.id, random.Random(seed))
-    for _ in range(80):
+    for _ in range(100):
         shop.step()
 
     assert_ledger_consistent(db)

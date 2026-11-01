@@ -14,6 +14,7 @@ from app.routers import (
     inventory,
     products,
     purchase_orders,
+    sales,
     settings,
     suppliers,
     users,
@@ -55,6 +56,7 @@ def create_app() -> FastAPI:
         inventory,
         suppliers,
         purchase_orders,
+        sales,
     )
     for module in routers:
         app.include_router(module.router, prefix="/api")

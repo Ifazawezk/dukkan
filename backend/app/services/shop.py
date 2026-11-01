@@ -1,3 +1,6 @@
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
+
 from sqlalchemy.orm import Session
 
 from app.errors import InvalidRequest, NotFound, PermissionDenied
@@ -11,6 +14,11 @@ def get_shop_settings(db: Session) -> ShopSettings:
         db.add(settings)
         db.flush()
     return settings
+
+
+def business_date(settings: ShopSettings, at: datetime) -> date:
+    """The shop's local calendar day for a UTC timestamp (Qatar is UTC+3)."""
+    return at.astimezone(ZoneInfo(settings.timezone)).date()
 
 
 def resolve_branch_id(db: Session, user: User, branch_id: int | None) -> int:

@@ -8,6 +8,7 @@ from app.models.purchasing import (
     PurchaseOrderStatus,
     Supplier,
 )
+from app.models.sales import Payment, PaymentMethod, Sale, SaleItem, SaleStatus
 from app.models.shop import Branch, DocumentCounter, ShopSettings
 from app.models.user import Role, User
 
@@ -17,11 +18,16 @@ __all__ = [
     "Category",
     "DocumentCounter",
     "MovementKind",
+    "Payment",
+    "PaymentMethod",
     "Product",
     "PurchaseOrder",
     "PurchaseOrderItem",
     "PurchaseOrderStatus",
     "Role",
+    "Sale",
+    "SaleItem",
+    "SaleStatus",
     "ShopSettings",
     "StockLevel",
     "StockMovement",
