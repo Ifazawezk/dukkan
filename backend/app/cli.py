@@ -1,6 +1,8 @@
 """Command line helpers.
 
 python -m app.cli create-owner --username owner
+python -m app.cli verify-stock
+python -m app.cli seed --reset
 """
 
 import argparse
@@ -12,6 +14,7 @@ from sqlalchemy import select
 from app.db import SessionLocal
 from app.models import Role, User
 from app.security import hash_password
+from app.seed import DEMO_PASSWORD, clear_database, database_is_empty, seed_demo
 from app.services.inventory import verify_ledger
 
 
@@ -55,6 +58,26 @@ def verify_stock() -> int:
     return 1 if problems else 0
 
 
+def seed(days: int, reset: bool) -> int:
+    with SessionLocal() as db:
+        if not database_is_empty(db):
+            if not reset:
+                print(
+                    "The database already has data. Use --reset to wipe it first.",
+                    file=sys.stderr,
+                )
+                return 1
+            clear_database(db)
+        print(f"Creating the demo shop with {days} days of trading...")
+        result = seed_demo(db, days=days)
+    print(
+        f"Done in {result.seconds:.1f}s: {result.products} products, {result.sales} sales, "
+        f"{result.returns} returns, {result.purchase_orders} purchase orders."
+    )
+    print(f"Log in as owner, manager, rahul, maria or omar with the password {DEMO_PASSWORD!r}.")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m app.cli", description="Dukkan admin commands")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -66,11 +89,17 @@ def main(argv: list[str] | None = None) -> int:
 
     commands.add_parser("verify-stock", help="check stock levels against the movement ledger")
 
+    demo = commands.add_parser("seed", help="fill the database with a demo shop")
+    demo.add_argument("--days", type=int, default=45, help="days of sales history (default 45)")
+    demo.add_argument("--reset", action="store_true", help="delete all existing data first")
+
     args = parser.parse_args(argv)
     if args.command == "create-owner":
         return create_owner(args.username, args.full_name, args.password)
     if args.command == "verify-stock":
         return verify_stock()
+    if args.command == "seed":
+        return seed(args.days, args.reset)
     return 1
 
 

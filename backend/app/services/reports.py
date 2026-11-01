@@ -20,6 +20,7 @@ from sqlalchemy import BigInteger, Select, func, select, type_coerce
 from sqlalchemy.orm import Session
 
 from app.models import (
+    Branch,
     Category,
     Payment,
     PaymentMethod,
@@ -402,11 +403,20 @@ def cashier_performance(db: Session, period: Period) -> list[dict]:
 
 
 def low_stock_count(db: Session, branch_id: int | None = None) -> int:
-    on_hand = _on_hand(db, branch_id)
+    """Active products at or below their threshold, in the branch or in any branch."""
+    if branch_id is None:
+        branch_ids = list(db.scalars(select(Branch.id).where(Branch.is_active.is_(True))))
+    else:
+        branch_ids = [branch_id]
+    stock = {branch: _on_hand(db, branch) for branch in branch_ids}
     products = db.execute(
         select(Product.id, Product.low_stock_threshold).where(Product.is_active.is_(True))
+    ).all()
+    return sum(
+        1
+        for product_id, threshold in products
+        if any(stock[branch].get(product_id, 0) <= threshold for branch in branch_ids)
     )
-    return sum(1 for pid, threshold in products if on_hand.get(pid, 0) <= threshold)
 
 
 def summary(db: Session, period: Period, today: date) -> dict:

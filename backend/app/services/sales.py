@@ -89,9 +89,10 @@ def checkout(
     base = sum((q(i.unit_price * i.quantity) - i.discount for i in inputs), ZERO)
     cart = pricing.price_cart(inputs, _order_discount_amount(order_discount, base))
 
-    if user.role == Role.cashier and cart.subtotal > 0:
-        discount_percent = cart.discount_total / cart.subtotal * 100
-        if discount_percent > settings.max_cashier_discount_percent:
+    if user.role == Role.cashier:
+        # Compare rounded amounts, so a 10% discount on 2.25 (0.23) is still 10%.
+        allowed = q(cart.subtotal * settings.max_cashier_discount_percent / 100)
+        if cart.discount_total > allowed:
             raise PermissionDenied(
                 "This discount needs a manager",
                 max_percent=float(settings.max_cashier_discount_percent),

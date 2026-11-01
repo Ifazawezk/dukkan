@@ -265,3 +265,18 @@ def test_business_date_follows_qatar_time(db, users, branch, milk):
     )
     db.commit()
     assert sale.business_date == date(2026, 10, 31)
+
+
+def test_cashier_limit_survives_rounding(client, db, auth, users, branch):
+    # 10% of 2.25 is 0.225, which rounds up to 0.23. That is still a 10% discount.
+    item = make_product(db, sale_price="2.25")
+    give_stock(db, item, branch.id, 5, users["manager"])
+    response = checkout(
+        client,
+        auth["cashier"],
+        [{"product_id": item.id, "quantity": 1}],
+        [cash(5)],
+        discount={"type": "percent", "value": 10},
+    )
+    assert response.status_code == 201
+    assert response.json()["discount_total"] == 0.23
