@@ -173,3 +173,95 @@ export interface CheckoutInput {
   discount: { type: "percent" | "amount"; value: number } | null;
   payments: { method: PaymentMethod; amount: number; reference?: string }[];
 }
+
+export interface StockRow {
+  product_id: number;
+  sku: string;
+  barcode: string | null;
+  name: string;
+  name_ar: string;
+  category_id: number | null;
+  unit: string;
+  quantity: number;
+  low_stock_threshold: number;
+  is_low: boolean;
+  sale_price: number;
+  cost_price: number | null;
+  stock_value: number | null;
+}
+
+export type MovementKind = "purchase" | "sale" | "return" | "adjustment";
+export type AdjustmentReason =
+  "opening_stock" | "count_correction" | "damaged" | "expired" | "lost" | "internal_use" | "other";
+
+export interface Movement {
+  id: number;
+  product_id: number;
+  sku: string;
+  product_name: string;
+  branch_id: number;
+  kind: MovementKind;
+  quantity_change: number;
+  balance_after: number;
+  unit_cost: number | null;
+  reason: AdjustmentReason | null;
+  reference_type: string | null;
+  reference_id: number | null;
+  note: string;
+  user_id: number | null;
+  user_name: string | null;
+  created_at: string;
+}
+
+export interface LedgerCheck {
+  ok: boolean;
+  pairs_checked: number;
+  problems: { product_id: number; branch_id: number; problem: string }[];
+}
+
+export interface Supplier {
+  id: number;
+  name: string;
+  contact_name: string;
+  phone: string;
+  email: string;
+  address: string;
+  notes: string;
+  is_active: boolean;
+}
+
+export type PurchaseOrderStatus =
+  "draft" | "ordered" | "partially_received" | "received" | "cancelled";
+
+export interface PurchaseOrderSummary {
+  id: number;
+  number: string;
+  supplier_id: number;
+  supplier_name: string;
+  branch_id: number;
+  status: PurchaseOrderStatus;
+  expected_date: string | null;
+  created_at: string;
+  item_count: number;
+  total_cost: number;
+}
+
+export interface PurchaseItem {
+  id: number;
+  product_id: number;
+  sku: string;
+  product_name: string;
+  product_name_ar: string;
+  quantity_ordered: number;
+  quantity_received: number;
+  unit_cost: number;
+  line_total: number;
+}
+
+export interface PurchaseOrder extends PurchaseOrderSummary {
+  notes: string;
+  ordered_at: string | null;
+  received_at: string | null;
+  cancelled_at: string | null;
+  items: PurchaseItem[];
+}

@@ -4,7 +4,10 @@ import { useAuth } from "./auth/AuthContext";
 import { Layout } from "./components/Layout";
 import { Spinner } from "./components/ui";
 import { LoginPage } from "./pages/LoginPage";
+import { InventoryPage } from "./pages/InventoryPage";
 import { ProductsPage } from "./pages/ProductsPage";
+import { PurchasingPage } from "./pages/PurchasingPage";
+import { SalesPage } from "./pages/SalesPage";
 import { PosPage } from "./pages/pos/PosPage";
 import { homeFor } from "./routes";
 
@@ -33,7 +36,10 @@ export default function App() {
       >
         <Route index element={<Home />} />
         <Route path="pos" element={<PosPage />} />
+        <Route path="sales" element={<SalesPage />} />
         <Route path="products" element={<ProductsPage />} />
+        <Route path="inventory" element={<InventoryPage />} />
+        <Route path="purchasing" element={<PurchasingPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

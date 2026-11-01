@@ -1,4 +1,13 @@
-import { Languages, LogOut, Package, ShoppingCart, Store } from "lucide-react";
+import {
+  Boxes,
+  Languages,
+  LogOut,
+  Package,
+  ReceiptText,
+  ShoppingCart,
+  Store,
+  Truck,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { NavLink, Outlet } from "react-router";
 import type { Role } from "../api/types";
@@ -16,10 +25,14 @@ interface NavItem {
 }
 
 const ALL: Role[] = ["owner", "manager", "cashier"];
+const MANAGERS: Role[] = ["owner", "manager"];
 
 export const NAV: NavItem[] = [
   { to: "/pos", label: "nav.pos", icon: ShoppingCart, roles: ALL },
+  { to: "/sales", label: "nav.sales", icon: ReceiptText, roles: ALL },
   { to: "/products", label: "nav.products", icon: Package, roles: ALL },
+  { to: "/inventory", label: "nav.inventory", icon: Boxes, roles: ALL },
+  { to: "/purchasing", label: "nav.purchasing", icon: Truck, roles: MANAGERS },
 ];
 
 export function Layout() {
