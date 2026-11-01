@@ -57,6 +57,8 @@ class ProductOut(Schema):
     is_active: bool
     created_at: datetime
     updated_at: datetime
+    # Stock on hand in the requested branch, when one is known.
+    stock: int | None = None
 
 
 class ProductCreate(Schema):

@@ -12,6 +12,7 @@ from sqlalchemy import select
 from app.db import SessionLocal
 from app.models import Role, User
 from app.security import hash_password
+from app.services.inventory import verify_ledger
 
 
 def create_owner(username: str, full_name: str, password: str | None) -> int:
@@ -42,6 +43,18 @@ def create_owner(username: str, full_name: str, password: str | None) -> int:
     return 0
 
 
+def verify_stock() -> int:
+    with SessionLocal() as db:
+        checked, problems = verify_ledger(db)
+    for problem in problems:
+        print(
+            f"product {problem.product_id} branch {problem.branch_id}: {problem.problem} "
+            f"(stock level {problem.stock_level}, ledger {problem.ledger_total})"
+        )
+    print(f"Checked {checked} product/branch pairs, {len(problems)} problem(s).")
+    return 1 if problems else 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m app.cli", description="Dukkan admin commands")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -51,9 +64,13 @@ def main(argv: list[str] | None = None) -> int:
     owner.add_argument("--full-name", default="Shop Owner")
     owner.add_argument("--password", help="prompted for when left out")
 
+    commands.add_parser("verify-stock", help="check stock levels against the movement ledger")
+
     args = parser.parse_args(argv)
     if args.command == "create-owner":
         return create_owner(args.username, args.full_name, args.password)
+    if args.command == "verify-stock":
+        return verify_stock()
     return 1
 
 

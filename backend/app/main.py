@@ -6,7 +6,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from app import __version__
 from app.config import DEFAULT_SECRET_KEY, get_settings
 from app.errors import register_error_handlers
-from app.routers import auth, branches, categories, health, products, settings, users
+from app.routers import (
+    auth,
+    branches,
+    categories,
+    health,
+    inventory,
+    products,
+    settings,
+    users,
+)
 
 DESCRIPTION = """
 Inventory and point-of-sale API for small shops in Qatar and the Gulf.
@@ -33,7 +42,8 @@ def create_app() -> FastAPI:
     )
     register_error_handlers(app)
 
-    for module in (health, auth, users, branches, settings, categories, products):
+    routers = (health, auth, users, branches, settings, categories, products, inventory)
+    for module in routers:
         app.include_router(module.router, prefix="/api")
     return app
 

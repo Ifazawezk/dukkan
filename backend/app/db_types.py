@@ -5,10 +5,11 @@ SQLite and PostgreSQL behave the same and no floating point ever touches a
 price. In Python the value is always a ``Decimal``.
 """
 
+import enum
 from datetime import UTC, datetime
 from decimal import ROUND_HALF_UP, Decimal
 
-from sqlalchemy import BigInteger, DateTime
+from sqlalchemy import BigInteger, DateTime, Enum
 from sqlalchemy.types import TypeDecorator
 
 
@@ -65,3 +66,13 @@ def Money() -> FixedDecimal:  # noqa: N802 - reads like a type in model definiti
 
 def Percent() -> FixedDecimal:  # noqa: N802
     return FixedDecimal(2)
+
+
+def str_enum(enum_class: type[enum.Enum], length: int = 20) -> Enum:
+    """Store a Python enum as its string value in a plain VARCHAR column."""
+    return Enum(
+        enum_class,
+        native_enum=False,
+        length=length,
+        values_callable=lambda members: [member.value for member in members],
+    )

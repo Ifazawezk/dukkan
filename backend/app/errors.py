@@ -26,6 +26,10 @@ class Conflict(DomainError):
     code = "conflict"
 
 
+class InsufficientStock(Conflict):
+    code = "insufficient_stock"
+
+
 class PermissionDenied(DomainError):
     status_code = 403
     code = "forbidden"
