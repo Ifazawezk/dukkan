@@ -7,14 +7,20 @@ happens, three things must stay true:
 2. each movement's balance_after is the running total up to that movement,
 3. stock never goes below zero (negative stock is off by default),
 
-and the final quantities must match a simple model kept by the test.
+the final quantities must match a simple model kept by the test, and the
+money on every sale (lines, payments, refunds) must add up.
 """
 
 import random
 
 import pytest
 
-from tests.helpers import assert_ledger_consistent, make_product, stock_of
+from tests.helpers import (
+    assert_ledger_consistent,
+    assert_money_consistent,
+    make_product,
+    stock_of,
+)
 
 
 class Shop:
@@ -29,6 +35,7 @@ class Shop:
         self.products = [make_product(self.db, name=f"Item {i}") for i in range(4)]
         self.expected = {p.id: 0 for p in self.products}
         self.supplier_id = self.post("/api/suppliers", {"name": "Supplier"}).json()["id"]
+        self.sales = []
 
     def post(self, url, payload=None):
         return self.client.post(url, json=payload, headers=self.auth["manager"])
@@ -75,6 +82,7 @@ class Shop:
             headers=self.auth["cashier"],
         )
         if response.status_code == 201:
+            self.sales.append(response.json()["id"])
             for item in items:
                 self.expected[item["product_id"]] -= item["quantity"]
         else:
@@ -82,11 +90,34 @@ class Shop:
             assert response.status_code == 409, response.text
             assert any(self.expected[i["product_id"]] < i["quantity"] for i in items)
 
+    def give_back(self):
+        if not self.sales:
+            return
+        sale_id = self.rng.choice(self.sales)
+        sale = self.client.get(f"/api/sales/{sale_id}", headers=self.auth["manager"]).json()
+        open_lines = [i for i in sale["items"] if i["quantity"] > i["quantity_returned"]]
+        if not open_lines:
+            return
+        line = self.rng.choice(open_lines)
+        quantity = self.rng.randint(1, line["quantity"] - line["quantity_returned"])
+        restock = self.rng.random() < 0.8
+        response = self.post(
+            f"/api/sales/{sale_id}/returns",
+            {"items": [{"sale_item_id": line["id"], "quantity": quantity, "restock": restock}]},
+        )
+        assert response.status_code == 201, response.text
+        if restock:
+            self.expected[line["product_id"]] += quantity
+
     def step(self):
         product = self.rng.choice(self.products)
-        operation = self.rng.choice(["purchase", "found", "remove", "count", "sell", "sell"])
+        operation = self.rng.choice(
+            ["purchase", "found", "remove", "count", "sell", "sell", "return"]
+        )
         if operation == "sell":
             self.sell()
+        elif operation == "return":
+            self.give_back()
         elif operation == "purchase":
             self.purchase(product)
         elif operation == "found":
@@ -107,6 +138,7 @@ def test_random_operations_keep_stock_consistent(seed, client, db, auth, branch)
         shop.step()
 
     assert_ledger_consistent(db)
+    assert_money_consistent(db)
     for product in shop.products:
         quantity = stock_of(db, product, branch.id)
         assert quantity >= 0

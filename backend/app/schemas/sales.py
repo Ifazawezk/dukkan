@@ -60,6 +60,8 @@ class SaleItemOut(Schema):
     tax_rate: Money
     tax_amount: Money
     line_total: Money
+    quantity_returned: int
+    refunded_amount: Money
 
 
 class PaymentOut(Schema):
@@ -92,5 +94,50 @@ class SaleOut(SaleSummary):
     customer_name: str
     customer_phone: str
     note: str
+    refunded_total: Money
     items: list[SaleItemOut]
     payments: list[PaymentOut]
+    returns: list["ReturnOut"]
+
+
+class ReturnLineIn(Schema):
+    sale_item_id: int
+    quantity: int = Field(gt=0, le=10_000)
+    restock: bool = True
+
+
+class ReturnIn(Schema):
+    items: list[ReturnLineIn] = Field(min_length=1, max_length=300)
+    reason: str = Field(default="", max_length=255)
+    # Defaults to the method the customer paid with.
+    refund_method: PaymentMethod | None = None
+
+
+class ReturnItemOut(Schema):
+    id: int
+    sale_item_id: int
+    product_id: int
+    product_name: str
+    quantity: int
+    refund_amount: Money
+    restocked: bool
+
+
+class ReturnOut(Schema):
+    id: int
+    return_no: str
+    sale_id: int
+    receipt_no: str
+    branch_id: int
+    user_id: int
+    user_name: str
+    business_date: date
+    created_at: datetime
+    reason: str
+    refund_method: PaymentMethod
+    refund_total: Money
+    items: list[ReturnItemOut]
+
+
+# ReturnOut is defined after SaleOut refers to it.
+SaleOut.model_rebuild()

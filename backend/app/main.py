@@ -60,6 +60,7 @@ def create_app() -> FastAPI:
     )
     for module in routers:
         app.include_router(module.router, prefix="/api")
+    app.include_router(sales.returns_router, prefix="/api")
     return app
 
 
