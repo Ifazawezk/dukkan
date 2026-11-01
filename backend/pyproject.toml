@@ -1,0 +1,19 @@
+[project]
+name = "dukkan"
+version = "0.1.0"
+description = "Inventory and point-of-sale API for small shops in Qatar and the Gulf"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "Mohaned Elhagar" }]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+ignore = ["B008"]
