@@ -28,6 +28,9 @@ router = APIRouter(prefix="/reports", tags=["reports"])
 
 Format = Annotated[Literal["json", "csv"], Query(description="json, or csv for a download")]
 
+# Spreadsheets treat cells starting with these as formulas.
+FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+
 
 def today(db: DbSession) -> date:
     return business_date(get_shop_settings(db), utcnow())
@@ -52,6 +55,13 @@ def report_period(
 PeriodDep = Annotated[reports.Period, Depends(report_period)]
 
 
+def safe_cell(value):
+    """Keep text such as a product name from running as a formula in Excel."""
+    if isinstance(value, str) and value.startswith(FORMULA_PREFIXES):
+        return f"'{value}"
+    return value
+
+
 def respond(rows: list[BaseModel], fmt: str, name: str, model: type[BaseModel]):
     if fmt == "json":
         return rows
@@ -59,7 +69,7 @@ def respond(rows: list[BaseModel], fmt: str, name: str, model: type[BaseModel]):
     writer = csv.DictWriter(buffer, fieldnames=list(model.model_fields))
     writer.writeheader()
     for row in rows:
-        writer.writerow(row.model_dump(mode="json"))
+        writer.writerow({k: safe_cell(v) for k, v in row.model_dump(mode="json").items()})
     # The byte order mark makes Excel open Arabic text correctly.
     return Response(
         content="﻿" + buffer.getvalue(),

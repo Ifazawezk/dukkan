@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router";
 import { useAuth } from "./auth/AuthContext";
@@ -8,8 +9,14 @@ import { InventoryPage } from "./pages/InventoryPage";
 import { ProductsPage } from "./pages/ProductsPage";
 import { PurchasingPage } from "./pages/PurchasingPage";
 import { SalesPage } from "./pages/SalesPage";
+import { SettingsPage } from "./pages/SettingsPage";
 import { PosPage } from "./pages/pos/PosPage";
 import { homeFor } from "./routes";
+
+// The charts library is large, so the reports page loads on demand.
+const ReportsPage = lazy(() =>
+  import("./pages/ReportsPage").then((module) => ({ default: module.ReportsPage })),
+);
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { user, ready } = useAuth();
@@ -40,6 +47,15 @@ export default function App() {
         <Route path="products" element={<ProductsPage />} />
         <Route path="inventory" element={<InventoryPage />} />
         <Route path="purchasing" element={<PurchasingPage />} />
+        <Route
+          path="reports"
+          element={
+            <Suspense fallback={<Spinner />}>
+              <ReportsPage />
+            </Suspense>
+          }
+        />
+        <Route path="settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

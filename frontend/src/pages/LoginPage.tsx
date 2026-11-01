@@ -79,7 +79,9 @@ export function LoginPage() {
           <Button type="submit" className="w-full" size="lg" disabled={busy}>
             {t("login.submit")}
           </Button>
-          <p className="text-center text-xs text-stone-500">{t("login.demo")}</p>
+          {import.meta.env.DEV && (
+            <p className="text-center text-xs text-stone-500">{t("login.demo")}</p>
+          )}
         </form>
       </div>
     </div>

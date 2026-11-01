@@ -265,3 +265,92 @@ export interface PurchaseOrder extends PurchaseOrderSummary {
   cancelled_at: string | null;
   items: PurchaseItem[];
 }
+
+export interface ReportSummary {
+  date_from: string;
+  date_to: string;
+  sales_total: number;
+  sales_count: number;
+  average_basket: number;
+  refunds: number;
+  net_sales: number;
+  gross_profit: number;
+  margin_percent: number;
+  today_sales_total: number;
+  today_sales_count: number;
+  low_stock_items: number;
+  stock_value: number;
+}
+
+export interface DailySalesRow {
+  date: string;
+  sales_count: number;
+  gross_sales: number;
+  discounts: number;
+  tax: number;
+  sales_total: number;
+  refunds: number;
+  net_sales: number;
+  revenue: number;
+  cash: number;
+  card: number;
+  wallet: number;
+  cost_of_goods: number;
+  gross_profit: number;
+}
+
+export interface ProductSalesRow {
+  product_id: number;
+  sku: string;
+  name: string;
+  name_ar: string;
+  units_sold: number;
+  revenue: number;
+  cost: number;
+  profit: number;
+}
+
+export interface CategoryProfitRow {
+  category_id: number | null;
+  category: string;
+  category_ar: string;
+  units_sold: number;
+  revenue: number;
+  cost: number;
+  profit: number;
+  margin_percent: number;
+}
+
+export interface SlowMoverRow {
+  product_id: number;
+  sku: string;
+  name: string;
+  name_ar: string;
+  on_hand: number;
+  units_sold: number;
+  last_sold: string | null;
+  days_since_last_sale: number | null;
+  stock_value: number;
+}
+
+export interface StockValuationRow {
+  category_id: number | null;
+  category: string;
+  category_ar: string;
+  products: number;
+  units: number;
+  cost_value: number;
+  retail_value: number;
+  potential_profit: number;
+}
+
+export interface CashierRow {
+  cashier_id: number;
+  cashier_name: string;
+  sales_count: number;
+  items_sold: number;
+  sales_total: number;
+  average_basket: number;
+  discounts_given: number;
+  refunded: number;
+}

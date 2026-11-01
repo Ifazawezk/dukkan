@@ -1,9 +1,11 @@
 import {
+  BarChart3,
   Boxes,
   Languages,
   LogOut,
   Package,
   ReceiptText,
+  Settings,
   ShoppingCart,
   Store,
   Truck,
@@ -33,6 +35,8 @@ export const NAV: NavItem[] = [
   { to: "/products", label: "nav.products", icon: Package, roles: ALL },
   { to: "/inventory", label: "nav.inventory", icon: Boxes, roles: ALL },
   { to: "/purchasing", label: "nav.purchasing", icon: Truck, roles: MANAGERS },
+  { to: "/reports", label: "nav.reports", icon: BarChart3, roles: MANAGERS },
+  { to: "/settings", label: "nav.settings", icon: Settings, roles: ALL },
 ];
 
 export function Layout() {

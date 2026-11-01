@@ -179,6 +179,27 @@ def test_category_csv_keeps_arabic(client, auth, history):
     assert "ألبان" in response.content.decode("utf-8-sig")
 
 
+def test_csv_neutralises_spreadsheet_formulas(client, db, auth, users, branch):
+    product = make_product(db, name='=HYPERLINK("http://evil.test")', sale_price="5.00")
+    give_stock(db, product, branch.id, 1, users["manager"])
+    sales.checkout(
+        db,
+        user=users["manager"],
+        branch_id=branch.id,
+        lines=[sales.CartLine(product.id, 1)],
+        payments=[pricing.PaymentInput(PaymentMethod.cash, Decimal("5.00"))],
+        at=DAY1,
+    )
+    db.commit()
+    response = client.get(
+        "/api/reports/top-products",
+        params={**PARAMS, "format": "csv"},
+        headers=auth["manager"],
+    )
+    rows = list(csv.DictReader(io.StringIO(response.content.decode("utf-8-sig"))))
+    assert rows[0]["name"].startswith("'=")
+
+
 def test_tax_is_not_counted_as_revenue(db, users, branch):
     product = make_product(db, sale_price="100.00", cost_price="60.00", tax_rate="5")
     give_stock(db, product, branch.id, 1, users["manager"])

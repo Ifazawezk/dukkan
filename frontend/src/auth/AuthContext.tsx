@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { api, getToken, setToken } from "../api/client";
@@ -16,11 +17,14 @@ const AuthContext = createContext<Auth | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
+  const queryClient = useQueryClient();
 
   const logout = useCallback(() => {
     setToken(null);
     setUser(null);
-  }, []);
+    // The next person at the till must not see cached data from this login.
+    queryClient.clear();
+  }, [queryClient]);
 
   // Restore the session from a saved token.
   useEffect(() => {
