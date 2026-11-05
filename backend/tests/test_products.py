@@ -89,6 +89,52 @@ def test_search_in_english_arabic_sku_and_barcode(client, auth):
     assert search("%") == []  # wildcards are matched literally
 
 
+def test_arabic_search_ignores_hamza_and_taa_marbuta(client, auth):
+    make_product(
+        client,
+        auth["manager"],
+        sku="RIC-001",
+        barcode=None,
+        name="Basmati Rice 5kg",
+        name_ar="أرز بسمتي ٥ كغ",
+    )
+    make_product(
+        client,
+        auth["manager"],
+        sku="COF-001",
+        barcode=None,
+        name="Arabic Coffee 250g",
+        name_ar="قهوة عربية ٢٥٠ غ",
+    )
+    make_product(
+        client, auth["manager"], sku="SWT-001", barcode=None, name="Halwa", name_ar="حلوى عمانية"
+    )
+
+    def search(q):
+        response = client.get("/api/products", params={"q": q}, headers=auth["cashier"])
+        return [p["sku"] for p in response.json()["items"]]
+
+    # People often type a bare alef, ه for ة and ي for ى.
+    assert search("ارز") == ["RIC-001"]
+    assert search("إرز") == ["RIC-001"]
+    assert search("قهوه") == ["COF-001"]
+    assert search("حلوي") == ["SWT-001"]
+    assert search("أرز") == ["RIC-001"]
+
+
+def test_stock_search_ignores_hamza(client, auth):
+    make_product(
+        client,
+        auth["manager"],
+        sku="RIC-001",
+        barcode=None,
+        name="Basmati Rice 5kg",
+        name_ar="أرز بسمتي ٥ كغ",
+    )
+    response = client.get("/api/inventory/stock", params={"q": "ارز"}, headers=auth["manager"])
+    assert [row["sku"] for row in response.json()["items"]] == ["RIC-001"]
+
+
 def test_lookup_by_barcode_or_sku(client, auth):
     make_product(client, auth["manager"])
     by_barcode = client.get(
