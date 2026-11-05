@@ -6,7 +6,7 @@ Dukkan (دكان, Arabic for a small shop) is an open-source point of sale and i
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-3776AB.svg)
-![Tests: 149 passing](https://img.shields.io/badge/tests-149%20passing-brightgreen.svg)
+![Tests: 151 passing](https://img.shields.io/badge/tests-151%20passing-brightgreen.svg)
 
 Many small shops still keep stock in a notebook or a spreadsheet, or pay for point of sale software built for much bigger chains, so the owner finds out an item ran out when a customer asks for it. A shop in Doha often has an Arabic speaking owner, English speaking staff and customers who read either, so each user picks a language, the whole interface mirrors to right to left, and every product, category and branch has an Arabic name. Every change to stock is a row in a ledger, so the number on the screen can always be explained line by line.
 
@@ -76,6 +76,7 @@ This runs the web app, the API and PostgreSQL at http://localhost:8080. Set `POS
 At the till:
 
 - Keyboard and barcode friendly: F2 search, F4 pay, F8 clear, Enter to add a scanned code
+- Arabic search ignores how the hamza, a final ة or a final ى was typed, so ارز finds أرز and قهوه finds قهوة
 - Order discounts by percent or amount, with a limit for cashiers set by the owner
 - Split payments across cash, card and wallet, with change given from cash only
 - Printable receipts in the browser, plus a plain text version for 80 mm printers
@@ -102,7 +103,7 @@ Reports and setup:
 
 | Measure | Result | Reproduce with |
 | --- | --- | --- |
-| Backend tests | 149 passing | `pytest` |
+| Backend tests | 151 passing | `pytest` |
 | Line coverage of `backend/app` | 96% | `pytest --cov` |
 | Barcode lookup, p50 / p95 | 3.6 to 4.6 ms / 7.0 to 10.5 ms | `python scripts/bench_checkout.py` |
 | Checkout with 3 items, p50 / p95 | 13.8 to 18.5 ms / 24.6 to 35.9 ms | same |

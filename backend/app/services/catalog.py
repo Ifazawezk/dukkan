@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.errors import Conflict, NotFound
 from app.models import Category, Product
-from app.services.queries import like_pattern
+from app.services.queries import fold_arabic, folded, like_pattern
 
 
 def search_products(
@@ -17,7 +17,7 @@ def search_products(
         stmt = stmt.where(
             or_(
                 Product.name.ilike(pattern, escape="\\"),
-                Product.name_ar.ilike(pattern, escape="\\"),
+                folded(Product.name_ar).ilike(fold_arabic(pattern), escape="\\"),
                 Product.sku.ilike(pattern, escape="\\"),
                 Product.barcode.ilike(pattern, escape="\\"),
             )
